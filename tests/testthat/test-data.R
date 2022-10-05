@@ -1,0 +1,11 @@
+test_that("data nrow and ncol", {
+  data(world_climate)
+  data(japan_climate)
+  data(station_links)
+  expect_equal(nrow(japan_climate),  3768)
+  expect_equal(ncol(japan_climate),    14)
+  expect_equal(nrow(world_climate), 41328)
+  expect_equal(ncol(world_climate),    11)
+  expect_equal(nrow(station_links),  3444)
+  expect_equal(ncol(station_links),     3)
+})

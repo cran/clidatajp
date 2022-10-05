@@ -1,0 +1,115 @@
+---
+title: "clidatajp"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{clidatajp}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Japan Meteorological Agency ('JMA') web page
+
+'JMA' web page consists of some layers. 
+You can use different function for download each component.
+
+  - Area select: download_area_links()
+  - Country select: download_links()
+  - Station select: download_links()
+  - Climate data of a station: download_climate()
+
+# Links for climate data and station information
+
+I recommend to use existing data, 
+which are already downloaded and cleaned up. 
+
+When you want to download links for climate data, 
+use download_area_links() and download_links(). 
+download_area_links() returns links for 6 areas. 
+download_links() returns links for countries and stations. 
+
+For polite scraping, 5 sec interval is set in download_links(), 
+it takes about 15 minutes to get all station links. 
+Please use existing links by "data(station_links)", 
+if you do not need to renew links. 
+
+```{r setup}
+library(clidatajp)
+library(tidyverse)
+```
+
+```{r station_links}
+  # existing data
+data(station_links)
+station_links %>%
+  dplyr::mutate("station" := stringi::stri_unescape_unicode(station)) %>%
+  print() %>%
+  `$`("station") %>%
+  clean_station() %>%
+  dplyr::bind_cols(station_links["url"])
+
+  # Download new data
+  # If you want links for all countries and all sations, remove head().
+area_links <- download_area_links()
+station_links <- NULL
+area_links <- head(area_links)  # for test
+for(i in seq_along(area_links)){
+    print(stringr::str_c("area: ", i, " / ", length(area_links)))
+    country_links <- download_links(area_links[i])
+    country_links <- head(country_links)  # for test
+    for(j in seq_along(country_links)){
+        print(stringr::str_c("    country: ", j, " / ", length(country_links)))
+        station_links <- c(station_links, download_links(country_links[j]))
+    }
+}
+station_links <- tibble::tibble(url = station_links)
+station_links
+```
+
+# Climate data
+
+I recommend to use existing data, 
+which are already downloaded and cleaned up. 
+
+When you want to know how to prepare "data(japan_climate)", 
+please check url shown below. 
+
+https://github.com/matutosi/clidatajp/blob/main/data-raw/japan_climate.R
+
+For polite scraping, 5 sec interval is set in download_climate(), 
+it takes over 5 hours to get world climate data of all stations 
+because of huge amount of data (3444 stations). 
+Please use existing data by "data(world_climate)", 
+if you do not need to renew climate data. 
+
+```{r climate_data}
+  # existing data
+data(japan_climate)
+japan_climate %>%
+  dplyr::mutate_if(is.character, stringi::stri_unescape_unicode)
+
+data(world_climate)
+world_climate %>%
+  dplyr::mutate_if(is.character, stringi::stri_unescape_unicode)
+
+station_links <-
+  station_links %>%
+  head() %>%
+  `$`("url")
+
+  # Download new data
+  # If you want links for all countries and all sations, remove head().
+climate <- list()
+for(i in seq_along(station_links)){
+  print(stringr::str_c(i, " / ", length(station_links)))
+  climate[[i]] <- download_climate(station_links[i])
+}
+world_climate <- dplyr::bind_rows(climate)
+world_climate
+```

@@ -15,7 +15,7 @@ download_links(url)
 \item{url}{A String to specify target html.}
 }
 \value{
-\if{html}{\out{<div class="sourceCode">}}\preformatted{A string vector of url links.
+\if{html}{\out{<div class="sourceCode">}}\preformatted{A string vector of url links, or NULL when failed.
 }\if{html}{\out{</div>}}
 }
 \description{

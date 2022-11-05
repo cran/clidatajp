@@ -23,8 +23,8 @@
 #' }
 #' @examples
 #' library(tidyverse)
-#' data(world_climate)
-#' world_climate %>%
+#' data(japan_climate)
+#' japan_climate %>%
 #'   dplyr::mutate_all(stringi::stri_unescape_unicode)
 "japan_climate"
 

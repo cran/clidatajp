@@ -9,7 +9,7 @@
 #' 
 #' @name download_links
 #' @param url  A String to specify target html.
-#' @return     A string vector of url links.
+#' @return     A string vector of url links, or NULL when failed.
 #' @examples
 #' # If you want links for all countries and all sations, remove head().
 #' # The codes take over 5 sec because of poliste scraping.
@@ -33,8 +33,10 @@
 #' @export
 download_area_links <- function(
   url = "https://www.data.jma.go.jp/gmd/cpd/monitor/nrmlist/"){
+  html <- gracefully_fail(url)
+  if(is.null(html)) return(NULL)
   href <- 
-    url %>%
+    html %>%
     rvest::read_html() %>%
     rvest::html_elements("#main") %>%
     rvest::html_elements("area") %>%
@@ -47,8 +49,10 @@ download_area_links <- function(
 #' @export
 download_links <- function(url){
   sleep()
+  html <- gracefully_fail(url)
+  if(is.null(html)) return(NULL)
   href <- 
-    url %>%
+    html %>%
     rvest::read_html() %>%
     rvest::html_elements("#main") %>%
     rvest::html_elements("a") %>% 

@@ -9,7 +9,7 @@
 #' 
 #' @name download_climate
 #' @param url      A String to specify target html.
-#' @return  A tibble including climate and station information.
+#' @return  A tibble including climate and station information, or NULL when failed.
 #' @examples
 #' # If you want all climate data, remove head().
 #' # The codes take > 5 sec because of poliste scraping.
@@ -32,9 +32,9 @@
 #' @export
 download_climate <- function(url){
   sleep()
-  html <- 
-    url %>%
-    rvest::read_html()
+  html <- gracefully_fail(url)
+  if(is.null(html)) return(NULL)
+  html <- rvest::read_html(html)
   station <- 
     html %>%
     rvest::html_elements("#main") %>%

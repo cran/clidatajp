@@ -10,7 +10,7 @@ download_climate(url)
 \item{url}{A String to specify target html.}
 }
 \value{
-A tibble including climate and station information.
+A tibble including climate and station information, or NULL when failed.
 }
 \description{
 For polite scraping, 5 sec interval is set in download_climate(),

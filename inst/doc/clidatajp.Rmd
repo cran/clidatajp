@@ -56,20 +56,24 @@ station_links %>%
 
   # Download new data
   # If you want links for all countries and all sations, remove head().
-area_links <- download_area_links()
-station_links <- NULL
-area_links <- head(area_links)  # for test
-for(i in seq_along(area_links)){
-    print(stringr::str_c("area: ", i, " / ", length(area_links)))
-    country_links <- download_links(area_links[i])
-    country_links <- head(country_links)  # for test
-    for(j in seq_along(country_links)){
-        print(stringr::str_c("    country: ", j, " / ", length(country_links)))
-        station_links <- c(station_links, download_links(country_links[j]))
-    }
+url <- "https://www.data.jma.go.jp/gmd/cpd/monitor/nrmlist/"
+res <- gracefully_fail(url)
+if(!is.null(res)){
+  area_links <- download_area_links()
+  station_links <- NULL
+  area_links <- head(area_links)  # for test
+  for(i in seq_along(area_links)){
+      print(stringr::str_c("area: ", i, " / ", length(area_links)))
+      country_links <- download_links(area_links[i])
+      country_links <- head(country_links)  # for test
+      for(j in seq_along(country_links)){
+          print(stringr::str_c("    country: ", j, " / ", length(country_links)))
+          station_links <- c(station_links, download_links(country_links[j]))
+      }
+  }
+  station_links <- tibble::tibble(url = station_links)
+  station_links
 }
-station_links <- tibble::tibble(url = station_links)
-station_links
 ```
 
 # Climate data
@@ -98,18 +102,21 @@ data(world_climate)
 world_climate %>%
   dplyr::mutate_if(is.character, stringi::stri_unescape_unicode)
 
-station_links <-
-  station_links %>%
-  head() %>%
-  `$`("url")
-
   # Download new data
   # If you want links for all countries and all sations, remove head().
-climate <- list()
-for(i in seq_along(station_links)){
-  print(stringr::str_c(i, " / ", length(station_links)))
-  climate[[i]] <- download_climate(station_links[i])
+url <- "https://www.data.jma.go.jp/gmd/cpd/monitor/nrmlist/"
+res <- gracefully_fail(url)
+if(!is.null(res)){
+  station_links <-
+    station_links %>%
+    head() %>%
+    `$`("url")
+  climate <- list()
+  for(i in seq_along(station_links)){
+    print(stringr::str_c(i, " / ", length(station_links)))
+    climate[[i]] <- download_climate(station_links[i])
+  }
+  world_climate <- dplyr::bind_rows(climate)
+  world_climate
 }
-world_climate <- dplyr::bind_rows(climate)
-world_climate
 ```

@@ -3,7 +3,7 @@
 \name{download_links}
 \alias{download_links}
 \alias{download_area_links}
-\title{download links for areas, countries and stations}
+\title{Download links for areas, countries and stations}
 \usage{
 download_area_links(
   url = "https://www.data.jma.go.jp/gmd/cpd/monitor/nrmlist/"
@@ -30,9 +30,20 @@ https://www.data.jma.go.jp/gmd/cpd/monitor/nrmlist/
 # If you want links for all countries and all sations, remove head().
 # The codes take over 5 sec because of poliste scraping.
 \donttest{
-library(tidyverse)
+library(magrittr)
+library(stringi)
+library(dplyr)
+library(tibble)
 area_links <- download_area_links()
 station_links <- NULL
+continent     <- NULL
+continents <- 
+  c("\\\\u30a2\\\\u30d5\\\\u30ea\\\\u30ab",
+    "\\\\u30a2\\\\u30b8\\\\u30a2",
+    "\\\\u5357\\\\u30a2\\\\u30e1\\\\u30ea\\\\u30ab", 
+    "\\\\u5317\\\\u4e2d\\\\u30a2\\\\u30e1\\\\u30ea\\\\u30ab",
+    "\\\\u30aa\\\\u30bb\\\\u30a2\\\\u30cb\\\\u30a2",
+    "\\\\u30e8\\\\u30fc\\\\u30ed\\\\u30c3\\\\u30d1")
 area_links <- head(area_links, 1)  # for test
 for(i in seq_along(area_links)){
     print(stringr::str_c("area: ", i, " / ", length(area_links)))
@@ -40,10 +51,12 @@ for(i in seq_along(area_links)){
     country_links <- head(country_links, 1)  # for test
     for(j in seq_along(country_links)){
         print(stringr::str_c("    country: ", j, " / ", length(country_links)))
-        station_links <- c(station_links, download_links(country_links[j]))
+        links <- download_links(country_links[j])
+        station_links <- c(station_links, links)
+        continent     <- c(continent,     rep(continents[i], length(links)))
     }
 }
-station_links <- tibble::tibble(url = station_links)
+station_links <- tibble::tibble(url = station_links, continent = continent)
 station_links
 }
 }

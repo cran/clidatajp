@@ -41,10 +41,14 @@ if you do not need to renew links.
 
 ```{r setup}
 library(clidatajp)
-library(tidyverse)
+library(magrittr)
+library(dplyr)
+library(tibble)
+library(ggplot2)
+library(stringi)
 ```
 
-```{r station_links}
+```{r station_links, eval = FALSE}
   # existing data
 data(station_links)
 station_links %>%
@@ -81,25 +85,25 @@ if(!is.null(res)){
 I recommend to use existing data, 
 which are already downloaded and cleaned up. 
 
-When you want to know how to prepare "data(japan_climate)", 
+When you want to know how to prepare "data(climate_jp)", 
 please check url shown below. 
 
-https://github.com/matutosi/clidatajp/blob/main/data-raw/japan_climate.R
+https://github.com/matutosi/clidatajp/blob/main/data-raw/climate_jp.R
 
 For polite scraping, 5 sec interval is set in download_climate(), 
 it takes over 5 hours to get world climate data of all stations 
 because of huge amount of data (3444 stations). 
-Please use existing data by "data(world_climate)", 
+Please use existing data by "data(climate_world)", 
 if you do not need to renew climate data. 
 
-```{r climate_data}
+```{r climate_data, eval = FALSE}
   # existing data
-data(japan_climate)
-japan_climate %>%
+data(climate_jp)
+climate_jp %>%
   dplyr::mutate_if(is.character, stringi::stri_unescape_unicode)
 
-data(world_climate)
-world_climate %>%
+data(climate_world)
+climate_world %>%
   dplyr::mutate_if(is.character, stringi::stri_unescape_unicode)
 
   # Download new data
@@ -119,4 +123,91 @@ if(!is.null(res)){
   world_climate <- dplyr::bind_rows(climate)
   world_climate
 }
+```
+
+## Plot
+
+Clean up data before drawing plot. 
+
+```{r clean_data}
+data(climate_world)
+data(climate_jp)
+climate <- 
+  dplyr::bind_rows(climate_world, climate_jp) %>%
+  dplyr::mutate_if(is.character, stringi::stri_unescape_unicode)  %>%
+  dplyr::group_by(country, station) %>%
+  dplyr::filter(sum(is.na(temperature), is.na(precipitation)) == 0) %>%
+  dplyr::filter(period != "1991-2020" | is.na(period))
+
+climate <- 
+  climate %>%
+  dplyr::summarise(temp = mean(as.numeric(temperature)), prec = sum(as.numeric(precipitation))) %>%
+  dplyr::left_join(dplyr::distinct(dplyr::select(climate, station:altitude))) %>%
+  dplyr::left_join(tibble::tibble(NS = c("S", "N"), ns = c(-1, 1))) %>%
+  dplyr::left_join(tibble::tibble(WE = c("W", "E"), we = c(-1, 1))) %>%
+  dplyr::group_by(station) %>%
+  dplyr::mutate(lat = latitude * ns, lon = longitude * we)
+```
+
+Draw a world map with temperature. 
+
+```{r temperature}
+climate %>%
+  ggplot2::ggplot(aes(lon, lat, colour = temp)) +
+    scale_colour_gradient2(low = "blue", mid = "gray", high = "red", midpoint = 15) + 
+    geom_point() + 
+    coord_fixed() + 
+    theme_bw() + 
+    theme(legend.key.size = unit(0.3, 'cm'))
+    # ggsave("temperature.png")
+```
+
+Draw a world map with precipitation except over 5000 mm/yr (to avoid extended legend).
+
+```{r precipitation}
+climate %>%
+  dplyr::filter(prec < 5000) %>%
+  ggplot2::ggplot(aes(lon, lat, colour = prec)) +
+    scale_colour_gradient2(low = "yellow", mid = "gray", high = "blue", midpoint = 1500) + 
+    geom_point() + 
+    coord_fixed() + 
+    theme_bw() + 
+    theme(legend.key.size = unit(0.3, 'cm'))
+  # ggsave("precipitation.png")
+```
+
+Show relationships between temperature and precipitation except Japan.
+
+```{r except_japan}
+japan <- stringi::stri_unescape_unicode("\\u65e5\\u672c")
+climate %>%
+  dplyr::filter(country != japan) %>%
+  ggplot2::ggplot(aes(temp, prec)) + 
+  geom_point() + 
+  theme_bw() + 
+  theme(legend.position="none")
+  # ggsave("climate_nojp.png")
+```
+
+Show relationships between temperature and precipitation including Japan.
+
+```{r all_data}
+climate %>%
+  ggplot2::ggplot(aes(temp, prec)) + 
+    geom_point() + 
+    theme_bw()
+  # ggsave("climate_all.png")
+```
+
+Show relationships between temperature and precipitation. 
+Blue: Japan, red: others. 
+
+```{r compare_japan}
+climate %>%
+  dplyr::mutate(jp = (country == japan)) %>%
+  ggplot2::ggplot(aes(temp, prec, colour = jp)) + 
+    geom_point() + 
+    theme_bw() +
+    theme(legend.position="none")
+  # ggsave("climate_compare_jp.png")
 ```

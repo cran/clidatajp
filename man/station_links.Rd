@@ -5,11 +5,12 @@
 \alias{station_links}
 \title{Station name and its URL}
 \format{
-A data frame with  3444 rows and 3 variable:
+A data frame with  3444 rows and 4 variable:
 \describe{
 \item{no           }{Station no}
 \item{station      }{Station information including no, month, temperature, precipitation, station, country, latitude, NS, longitude, WE, altitude. The information is NOT cleaned Row information downloaded from each URL. Escaped by stringi::stri_escape_unicode().}
 \item{url         }{URL of station.}
+\item{continent    }{Continent. Escaped by stringi::stri_escape_unicode().}
 }
 }
 \usage{
@@ -19,7 +20,9 @@ station_links
 Station name and its URL
 }
 \examples{
-library(tidyverse)
+library(magrittr)
+library(stringi)
+library(dplyr)
 data(station_links)
 station_links \%>\%
   dplyr::mutate_all(stringi::stri_unescape_unicode)

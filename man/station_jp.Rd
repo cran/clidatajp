@@ -5,9 +5,9 @@
 \alias{station_jp}
 \title{Climate stations in Japan}
 \format{
-A data frame with 3444 rows and 4 variable:
+A data frame with 157 rows and 11 variable:
 \describe{
-\item{region       }{Rejon. Escaped by stringi::stri_escape_unicode().}
+\item{region       }{Region. Escaped by stringi::stri_escape_unicode().}
 \item{pref         }{Prefecture. Escaped by stringi::stri_escape_unicode()}
 \item{no           }{Station no.}
 \item{station      }{Station name. To avoid duplication, including country name after station name. Can split by "_". Escaped by stringi::stri_escape_unicode().}

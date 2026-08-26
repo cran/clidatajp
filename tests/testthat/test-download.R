@@ -1,4 +1,6 @@
 test_that("download_area_links(), download_links() and download_climate() works", {
+  skip_on_cran()
+
     # area links
   area <- download_area_links()
   exep <- 

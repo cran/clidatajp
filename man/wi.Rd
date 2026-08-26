@@ -30,13 +30,13 @@ ci <- sum(c(12.8, 12.2, 7.4, 0, 0, 0, 0, 0, 0, 0, 3.0, 9.1))
 \references{
 Kira, T. 1945.
 A new classification of climate in eastern Asia as the basis for agricultural geography,
-Hort. Inst. K,yoto Univ., Kyoto. (in Japanese)
+Hort. Inst. Kyoto Univ., Kyoto. (in Japanese)
 Warmth Index (WI) and Cold Index (CI) was proposed by Kira (1945),
 which is known closely related to the distribution of vegetation.
 Indices can are calculated by following equations.
 wi = sum (Ti - 5),
 where wi is Warm index,
-Ti (celsius) is mean temprature of each month in a year when Ti > 5.
+Ti (Celsius) is mean temperature of each month in a year when Ti > 5.
 Indices can are calculated by following equations.
 wi = -sum (Ti - 5),
 where wi is Cold index,

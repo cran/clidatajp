@@ -4,17 +4,29 @@ export("%>%")
 export(as_numeric_without_warnings)
 export(choose_with_menu)
 export(ci)
+export(clean_detail_value)
 export(clean_station)
+export(detail_colnames)
+export(detail_item)
+export(detail_url)
 export(download_area_links)
+export(download_block_no)
 export(download_climate)
+export(download_detail)
 export(download_links)
+export(download_prec_no)
 export(gracefully_fail)
 export(head_3)
 export(sleep)
+export(to_numeric_when_all)
 export(wi)
 importFrom(magrittr,"%>%")
-importFrom(rlang,":=")
-importFrom(rlang,.data)
+importFrom(rlang,
+  ":=",
+  .data
+)
 importFrom(stats,na.omit)
-importFrom(utils,data)
-importFrom(utils,head)
+importFrom(utils,
+  data,
+  head
+)
